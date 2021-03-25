@@ -1,3 +1,0 @@
-/home/oguz/Desktop/relimetrics/relimetrics/cmake-build-debug/CMakeFiles/rebuild_cache.dir
-/home/oguz/Desktop/relimetrics/relimetrics/cmake-build-debug/CMakeFiles/relimetrics.dir
-/home/oguz/Desktop/relimetrics/relimetrics/cmake-build-debug/CMakeFiles/edit_cache.dir
