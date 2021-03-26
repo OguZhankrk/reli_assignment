@@ -70,6 +70,9 @@ cv::Affine3f cameraPoseEstimation::getHomogenousMatrix()const{  // convert from 
     cv::Affine3f extrinsicParam_inv;
     extrinsicParam_inv = extrinsicParam.inv();
     std::cout << extrinsicParam_inv.matrix << std::endl;
+
+
+
     return extrinsicParam_inv;
 }
 

@@ -44,9 +44,8 @@ int main(int argc, char **argv) {
     std::vector<cv::Point3f> objectPoints = c.findObjectPoints(worldPoint);
     c.findExtrinsicParam(corners,objectPoints);
     cv::Affine3f extrinsicParam_inv = c.getHomogenousMatrix();
+
     */
-
-
 
 
 
@@ -66,8 +65,12 @@ int main(int argc, char **argv) {
     cv::Mat image = cv::imread("/home/oguz/Desktop/relimetrics/ChessBoard_Centered.tiff", cv::IMREAD_GRAYSCALE);
     if(image.empty())
         throw std::runtime_error("Image not found");
-
-
+    /*
+    cv::Mat imageUndistorted;
+    cv::undistort(image, imageUndistorted, cameraMatrix, distCoeffs);
+    cv::imshow("p",imageUndistorted);
+    cv::waitKey(0);
+    */
     bool imagePointsFound = cv::findChessboardCorners(image, patternSize, corners);
     if (!imagePointsFound)
         throw std::runtime_error(" Image Points not found");
@@ -79,63 +82,51 @@ int main(int argc, char **argv) {
     cv::waitKey(0);
     */
 
-    std::cout << corners<< std::endl;
-
-
     cv::cornerSubPix(image,corners,
             cv::Size(5,5),
             cv::Size(-1,-1),
             cv::TermCriteria(cv::TermCriteria::MAX_ITER + cv::TermCriteria::EPS, 30, 0.1));
 
-    //cv::Mat* objectPointsPointer = new cv::Mat(cv::Size(patternSize.width, patternSize.height), CV_64FC1);
+    std::cout << corners<< std::endl;
+
     std::vector<cv::Point3f> objectPoints;
 
-    // try 4 Corners one by one
-    //float xAxes = 1364.5 - 220;
-    //float yAxes = -27.2 + 160;
-    //float zAxes = 0;
 
-    //float xAxes = 1364.5 + 160;
-    //float yAxes = -27.2 - 220;
-    //float zAxes = 0;
-
-    float xAxes = 1364.5 - 220;
-    float yAxes = -27.2 - 160;
+    float xAxes = -220;
+    float yAxes =  160;
     float zAxes = 0;
 
     if(corners.size() == patternSize.area())
     {
         for(int i = 0; i < patternSize.height; i++){
             for(int j = 0; j < patternSize.width; j++){
-                cv::Point3f p = {(xAxes + j*20),(yAxes + i*20),1200};
+                cv::Point3f p = {(xAxes + j*20),(yAxes - i*20),0};
                 objectPoints.emplace_back(p);
             }
         }
     }
+
     std::cout << objectPoints << std::endl;
 
+    // Make sure that the last flat is set true
     cv::Vec3f rotationVec,translationVec;
 
     // Make sure that the last flat is set true
     bool cameraExtrinsicParamFound  = cv::solvePnP(objectPoints,corners,cameraMatrix, distCoeffs,rotationVec,translationVec,false,0);
-
-
+    /*
     //Check if the object points are true
     std::vector<cv::Point2f> imagePoints;
-    //cv::projectPoints(objectPoints,rotationVec,translationVec,cameraMatrix,distCoeffs,imagePoints);
-
-
+    cv::projectPoints(objectPoints,rotationVec,translationVec,cameraMatrix,distCoeffs,imagePoints);
     cv::Mat image2 = cv::imread("/home/oguz/Desktop/relimetrics/ChessBoard_Centered.tiff", cv::IMREAD_GRAYSCALE);
     for (auto p : imagePoints) {
-        cv::circle(image2,p,8,cv::Scalar(195,0,255),  -1);
-        break;
+        cv::circle(image2,p,20,cv::Scalar(195,0,255),  -1);
     }
-    /*
+    std::cout <<"imagepoints" << imagePoints << std::endl;
     cv::resize(image2, image2, cv::Size(image2.cols * 0.25, image2.rows * 0.25), 0, 0);
     cv::imshow("o",image2);
     cv::waitKey(0);
-    */
 
+    */
     if(!cameraExtrinsicParamFound)
         throw std::runtime_error(" Extrinsic Parameter not found");
     std::cout << rotationVec << std::endl;
@@ -148,12 +139,17 @@ int main(int argc, char **argv) {
 
     //Homogenous tranformation
     cv::Affine3f extrinsicParam(rotationMatrix, translationVec);
-    //std::cout << extrinsicParam.matrix << std::endl;
+    std::cout << extrinsicParam.matrix << std::endl;
 
     // Inverse
     cv::Affine3f extrinsicParam_inv;
     extrinsicParam_inv = extrinsicParam.inv();
     std::cout << extrinsicParam_inv.matrix << std::endl;
 
+    double distance = sqrt(pow(extrinsicParam_inv.translation()[0], 2) + pow(extrinsicParam_inv.translation()[1], 2)
+            + pow(extrinsicParam_inv.translation()[2], 2));
+
+
+    std::cout << distance << std::endl;
     return 0;
 }
